@@ -1,4 +1,5 @@
 import Config
+config :ash, policies: [show_policy_breakdowns?: true]
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -54,7 +55,7 @@ config :rubberduck_web, RubberduckWebWeb.Endpoint,
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :rubberduck_web, dev_routes: true
+config :rubberduck_web, dev_routes: true, token_signing_secret: "BeSHun6u5mF9z88lRbEVyOeKZCjxVqUU"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

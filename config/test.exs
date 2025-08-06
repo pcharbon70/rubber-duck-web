@@ -1,4 +1,7 @@
 import Config
+config :rubberduck_web, token_signing_secret: "gKPMG+bbRJ/oKMjASPSIpJXsMkq6XpmG"
+config :bcrypt_elixir, log_rounds: 1
+config :ash, policies: [show_policy_breakdowns?: true]
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.

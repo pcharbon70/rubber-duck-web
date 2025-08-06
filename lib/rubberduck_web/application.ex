@@ -14,7 +14,8 @@ defmodule RubberduckWeb.Application do
       # Start a worker by calling: RubberduckWeb.Worker.start_link(arg)
       # {RubberduckWeb.Worker, arg},
       # Start to serve requests, typically the last entry
-      RubberduckWebWeb.Endpoint
+      RubberduckWebWeb.Endpoint,
+      {AshAuthentication.Supervisor, [otp_app: :rubberduck_web]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
