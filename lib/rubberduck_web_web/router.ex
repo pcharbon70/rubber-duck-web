@@ -18,6 +18,7 @@ defmodule RubberduckWebWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    live "/code", CollaborativeCodingLive
   end
 
   # Other scopes may use custom stacks.

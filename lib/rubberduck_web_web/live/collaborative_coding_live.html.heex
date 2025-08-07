@@ -1,0 +1,203 @@
+<div class="collaborative-interface h-screen bg-base-200 flex flex-col"
+     role="main" 
+     aria-label="Collaborative coding environment">
+     
+  <!-- Skip links for accessibility -->
+  <div class="skip-links sr-only focus:not-sr-only">
+    <a href="#chat-panel" class="btn btn-primary focus:absolute focus:top-0 focus:left-0 z-50">Skip to Chat</a>
+    <a href="#code-editor" class="btn btn-primary focus:absolute focus:top-8 focus:left-0 z-50">Skip to Code Editor</a>
+    <a href="#user-presence" class="btn btn-primary focus:absolute focus:top-16 focus:left-0 z-50">Skip to User List</a>
+  </div>
+
+  <!-- Navbar Header -->
+  <header class="navbar bg-base-100 border-b border-base-300">
+    <div class="navbar-start">
+      <h1 class="text-xl font-bold text-base-content">
+        🦆 RubberDuck Collaborative Coding
+      </h1>
+    </div>
+
+    <div class="navbar-center">
+      <div class="flex items-center gap-2">
+        <!-- Connection status indicator -->
+        <div class="indicator">
+          <span class={[
+            "indicator-item badge badge-xs",
+            connection_status_badge_class(@connection_state)
+          ]}></span>
+          <div class="text-sm text-base-content/70">
+            Session: <%= String.slice(@session_id, 0, 8) %>...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="navbar-end">
+      <!-- Mobile panel toggles -->
+      <div class="md:hidden flex gap-1">
+        <button phx-click="toggle_panel" 
+                phx-value-panel="chat"
+                class="btn btn-ghost btn-sm"
+                aria-label="Toggle chat panel">
+          💬
+        </button>
+        
+        <button phx-click="toggle_panel" 
+                phx-value-panel="editor"
+                class="btn btn-ghost btn-sm"
+                aria-label="Toggle code editor">
+          💻
+        </button>
+      </div>
+
+      <!-- User avatar and menu -->
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar placeholder">
+          <div class="bg-primary text-primary-content w-10 rounded-full">
+            <span class="text-sm font-medium">
+              <%= String.first(@user.email) |> String.upcase() %>
+            </span>
+          </div>
+        </div>
+        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+          <li class="menu-title"><%= @user.email %></li>
+          <li><a>Settings</a></li>
+          <li><a>Sign Out</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main collaborative interface -->
+  <main class="flex-1 flex min-h-0">
+    
+    <!-- Mobile: Stacked layout -->
+    <div class="md:hidden flex flex-col w-full">
+      
+      <!-- Chat panel (mobile) -->
+      <%= if @layout_config.panels.chat.visible do %>
+        <section id="chat-panel-mobile" 
+                 class="flex-1 border-b border-base-300"
+                 role="region" 
+                 aria-label="AI Assistant Chat">
+          <.live_component 
+            module={ChatComponent}
+            id="chat-mobile"
+            user={@user}
+            session_id={@session_id}
+            duck_agent={@duck_agent}
+            connection_state={@connection_state}
+            layout="mobile" />
+        </section>
+      <% end %>
+      
+      <!-- Editor panel (mobile) -->
+      <%= if @layout_config.panels.editor.visible do %>
+        <section id="code-editor-mobile" 
+                 class="flex-1"
+                 role="region" 
+                 aria-label="Code Editor">
+          <.live_component 
+            module={EditorComponent}
+            id="editor-mobile"
+            user={@user}
+            session_id={@session_id}
+            connection_state={@connection_state}
+            layout="mobile" />
+        </section>
+      <% end %>
+      
+    </div>
+
+    <!-- Desktop: Side-by-side layout -->
+    <div class="hidden md:flex w-full"
+         style={"grid-template-columns: #{@layout_config.editor_width_percent}% #{@layout_config.chat_width_percent}%"}>
+      
+      <!-- Editor panel (desktop) -->
+      <%= if @layout_config.panels.editor.visible do %>
+        <section id="code-editor" 
+                 class="flex-1 min-w-0 border-r border-base-300"
+                 role="region" 
+                 aria-label="Code Editor"
+                 style={"width: #{@layout_config.editor_width_percent}%"}>
+          <.live_component 
+            module={EditorComponent}
+            id="editor-desktop"
+            user={@user}
+            session_id={@session_id}
+            connection_state={@connection_state}
+            layout="desktop" />
+        </section>
+      <% end %>
+
+      <!-- Chat and Presence sidebar -->
+      <aside class="flex flex-col min-w-0 bg-base-100"
+             style={"width: #{@layout_config.chat_width_percent}%"}>
+        
+        <!-- Chat panel (desktop) -->
+        <%= if @layout_config.panels.chat.visible do %>
+          <section id="chat-panel" 
+                   class="flex-1 min-h-0"
+                   role="region" 
+                   aria-label="AI Assistant Chat">
+            <.live_component 
+              module={ChatComponent}
+              id="chat-desktop"
+              user={@user}
+              session_id={@session_id}
+              duck_agent={@duck_agent}
+              connection_state={@connection_state}
+              layout="desktop" />
+          </section>
+        <% end %>
+
+        <!-- User presence panel -->
+        <%= if @layout_config.panels.presence.visible do %>
+          <section id="user-presence" 
+                   class="flex-none border-t border-base-300"
+                   role="region" 
+                   aria-label="Active Users">
+            <.live_component 
+              module={UserPresenceComponent}
+              id="user-presence"
+              user={@user}
+              session_id={@session_id}
+              connection_state={@connection_state} />
+          </section>
+        <% end %>
+        
+      </aside>
+    </div>
+  </main>
+
+  <!-- Connection status modal for critical issues -->
+  <%= if @connection_state in [:disconnected, :error] do %>
+    <div class="modal modal-open">
+      <div class="modal-box">
+        <h2 class="text-lg font-bold mb-4">🔌 Connection Issue</h2>
+        <p class="text-base-content/70 mb-6">
+          <%= connection_issue_message(@connection_state) %>
+        </p>
+        <div class="modal-action">
+          <button class="btn btn-primary" onclick="window.location.reload()">
+            🔄 Refresh Page
+          </button>
+        </div>
+      </div>
+      <div class="modal-backdrop bg-black/50"></div>
+    </div>
+  <% end %>
+
+</div>
+
+<script>
+  // Handle layout persistence in localStorage
+  window.addEventListener('phx:page-loading-stop', () => {
+    const layoutConfig = '<%= Jason.encode!(@layout_config) %>';
+    localStorage.setItem('collaborative_layout_config', layoutConfig);
+  });
+  
+  // TODO: Implement panel resizing functionality
+  // TODO: Add keyboard shortcuts for common actions
+  // TODO: Add gesture support for mobile panel switching
+</script>

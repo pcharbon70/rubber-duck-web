@@ -103,3 +103,53 @@
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /* This file is for your main application CSS */
+
+/* Monaco Editor Styles */
+.monaco-editor {
+  border-radius: 0.5rem;
+}
+
+.monaco-editor .cursor {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.monaco-editor .current-line {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Collaborative cursor styles for different users */
+.monaco-editor .collaborative-cursor-user-1 { background-color: #3B82F6; }
+.monaco-editor .collaborative-cursor-user-2 { background-color: #EF4444; }
+.monaco-editor .collaborative-cursor-user-3 { background-color: #10B981; }
+.monaco-editor .collaborative-cursor-user-4 { background-color: #F59E0B; }
+.monaco-editor .collaborative-cursor-user-5 { background-color: #8B5CF6; }
+
+/* Editor container responsive adjustments */
+.editor-container {
+  min-height: 400px;
+}
+
+@media (max-width: 768px) {
+  .editor-container {
+    min-height: 300px;
+  }
+}
+
+/* Loading spinner for Monaco Editor */
+.monaco-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+/* Fallback textarea styling */
+.monaco-fallback-textarea {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  border: none;
+  outline: none;
+  background: #1e1e1e;
+  color: #d4d4d4;
+}
