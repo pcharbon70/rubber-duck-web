@@ -25,11 +25,78 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/rubberduck_web"
 import topbar from "../vendor/topbar"
 
+// Monaco Editor Hooks
+const MonacoEditor = {
+  mounted() {
+    import("live_monaco_editor").then((module) => {
+      this.editor = module.create_editor(this.el, {
+        language: this.el.dataset.language || "elixir",
+        theme: this.el.dataset.theme || "vs-dark",
+        automaticLayout: true,
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        lineNumbers: "on",
+        renderWhitespace: "boundary",
+        tabSize: 2,
+        insertSpaces: true,
+        wordWrap: "on",
+        fontSize: 14,
+        fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', monospace"
+      })
+
+      // Listen for content changes
+      this.editor.onDidChangeModelContent(() => {
+        const content = this.editor.getValue()
+        this.pushEvent("editor_change", { content: content })
+      })
+
+      // Listen for cursor position changes
+      this.editor.onDidChangeCursorPosition((e) => {
+        this.pushEvent("cursor_move", { 
+          position: { 
+            line: e.position.lineNumber, 
+            column: e.position.column 
+          }
+        })
+      })
+
+      // Focus the editor
+      this.editor.focus()
+    }).catch((error) => {
+      console.warn("Failed to load Monaco Editor, falling back to textarea", error)
+      // Show fallback textarea
+      const fallback = this.el.querySelector('textarea')
+      if (fallback) {
+        fallback.style.display = 'block'
+        fallback.focus()
+      }
+    })
+  },
+
+  destroyed() {
+    if (this.editor) {
+      this.editor.dispose()
+    }
+  },
+
+  updated() {
+    // Handle updates from server if needed
+    if (this.editor && this.editor.getValue() !== this.el.dataset.content) {
+      const currentPosition = this.editor.getPosition()
+      this.editor.setValue(this.el.dataset.content || "")
+      this.editor.setPosition(currentPosition)
+    }
+  }
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks},
+  hooks: {
+    ...colocatedHooks,
+    MonacoEditor
+  },
 })
 
 // Show progress bar on live navigation and form submits

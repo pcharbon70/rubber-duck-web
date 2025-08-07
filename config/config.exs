@@ -49,7 +49,7 @@ config :spark,
 
 config :rubberduck_web,
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [RubberduckWeb.Accounts]
+  ash_domains: [RubberduckWeb.Accounts, RubberduckWeb.Collaborative]
 
 # Configures the endpoint
 config :rubberduck_web, RubberduckWebWeb.Endpoint,
