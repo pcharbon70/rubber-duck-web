@@ -4,7 +4,7 @@ defmodule RubberduckWeb.Accounts.User.Senders.SendPasswordResetEmail do
   """
 
   use AshAuthentication.Sender
-  use RubberduckWeb, :verified_routes
+  use RubberduckWebWeb, :verified_routes
 
   import Swoosh.Email
 

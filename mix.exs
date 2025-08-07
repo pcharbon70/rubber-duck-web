@@ -43,6 +43,8 @@ defmodule RubberduckWeb.MixProject do
     [
       {:bcrypt_elixir, "~> 3.0"},
       {:picosat_elixir, "~> 0.2"},
+      {:safe_code, "~> 0.2"},
+      {:live_monaco_editor, "~> 0.1"},
       {:sourceror, "~> 1.8", only: [:dev, :test]},
       {:tidewave, "~> 0.3", only: [:dev]},
       {:live_debugger, "~> 0.3", only: [:dev]},
