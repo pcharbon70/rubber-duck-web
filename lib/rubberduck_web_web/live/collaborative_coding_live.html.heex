@@ -12,8 +12,9 @@
   <!-- Navbar Header -->
   <header class="navbar bg-base-100 border-b border-base-300">
     <div class="navbar-start">
-      <h1 class="text-xl font-bold text-base-content">
-        🦆 RubberDuck Collaborative Coding
+      <h1 class="text-xl font-bold text-base-content flex items-center gap-2">
+        <img src="/images/rubberduck.svg" alt="RubberDuck" class="w-6 h-6" />
+        RubberDuck Collaborative Coding
       </h1>
     </div>
 
@@ -86,6 +87,7 @@
             user={@user}
             session_id={@session_id}
             duck_agent={@duck_agent}
+            active_users={@active_users}
             connection_state={@connection_state}
             layout="mobile" />
         </section>
@@ -146,25 +148,13 @@
               user={@user}
               session_id={@session_id}
               duck_agent={@duck_agent}
+              active_users={@active_users}
               connection_state={@connection_state}
               layout="desktop" />
           </section>
         <% end %>
 
-        <!-- User presence panel -->
-        <%= if @layout_config.panels.presence.visible do %>
-          <section id="user-presence" 
-                   class="flex-none border-t border-base-300"
-                   role="region" 
-                   aria-label="Active Users">
-            <.live_component 
-              module={UserPresenceComponent}
-              id="user-presence"
-              user={@user}
-              session_id={@session_id}
-              connection_state={@connection_state} />
-          </section>
-        <% end %>
+        <!-- User presence panel (now integrated in chat component) -->
         
       </aside>
     </div>

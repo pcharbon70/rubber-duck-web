@@ -83,4 +83,60 @@ defmodule RubberduckWeb.Collaborative do
       error -> error
     end
   end
+
+  @doc """
+  Add a chat message to the session.
+  """
+  def add_chat_message(session_id, message_data) do
+    with {:ok, session} <- get_by_session_id(session_id),
+         session when not is_nil(session) <- session do
+      
+      # Add message to Duck context conversation history
+      current_context = session.duck_context || %{}
+      conversation_history = current_context["conversation_history"] || []
+      
+      new_message = %{
+        id: generate_message_id(),
+        content: message_data.content,
+        sender_id: message_data.sender_id,
+        sender_type: message_data.sender_type,
+        timestamp: message_data.timestamp
+      }
+      
+      updated_history = conversation_history ++ [new_message]
+      # Keep only last 100 messages to manage memory
+      updated_history = Enum.take(updated_history, -100)
+      
+      updated_context = Map.put(current_context, "conversation_history", updated_history)
+      
+      session
+      |> Ash.Changeset.for_update(:update_duck_context, %{duck_context: updated_context})
+      |> Ash.update()
+    else
+      {:ok, nil} -> {:error, "Session not found"}
+      error -> error
+    end
+  end
+
+  @doc """
+  Get chat messages for a session.
+  """
+  def get_chat_messages(session_id) do
+    with {:ok, session} <- get_by_session_id(session_id),
+         session when not is_nil(session) <- session do
+      
+      conversation_history = 
+        session.duck_context
+        |> Map.get("conversation_history", [])
+      
+      {:ok, conversation_history}
+    else
+      {:ok, nil} -> {:ok, []}
+      error -> error
+    end
+  end
+
+  defp generate_message_id do
+    :crypto.strong_rand_bytes(8) |> Base.encode16(case: :lower)
+  end
 end

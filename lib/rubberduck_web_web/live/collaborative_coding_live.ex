@@ -31,16 +31,34 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
           |> assign(:page_title, "Collaborative Coding - RubberDuck")
           |> assign(:layout_config, default_layout_config())
           |> assign(:duck_agent, create_duck_representation())
+          |> assign(:active_users, %{})
 
         # Create or join collaborative session
-        case create_or_join_session(session_id, user.id) do
+        user_id = if is_map(user) && Map.has_key?(user, :id), do: user.id, else: user[:id]
+        case create_or_join_session(session_id, user_id) do
           {:ok, session_record} ->
+            # Initialize active users with current user
+            active_users = %{
+              user_id => %{
+                id: user_id,
+                name: user[:username] || user[:email],
+                email: user[:email],
+                status: :online,
+                color: "#3B82F6"
+              }
+            }
+            
             socket =
               socket
               |> assign(:session_record, session_record)
               |> assign(:connection_state, :connected)
+              |> assign(:active_users, active_users)
 
-            # TODO: Subscribe to Phoenix Channels for real-time updates
+            # Subscribe to Phoenix Channels for real-time updates
+            session_id = socket.assigns.session_id
+            Phoenix.PubSub.subscribe(RubberduckWeb.PubSub, "session:#{session_id}:system_broadcast")
+            Phoenix.PubSub.subscribe(RubberduckWeb.PubSub, "session:#{session_id}:llm_chat")
+            
             {:ok, socket}
 
           {:error, reason} ->
@@ -51,7 +69,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
         end
 
       {:error, reason} ->
-        {:ok, redirect(socket, to: ~p"/auth/sign_in?error=#{reason}")}
+        {:ok, redirect(socket, to: ~p"/sign-in?error=#{reason}")}
     end
   end
 
@@ -90,35 +108,68 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
     socket =
       socket
       |> put_flash(:error, "Your session has expired. Please sign in again.")
-      |> redirect(to: ~p"/auth/sign_in")
+      |> redirect(to: ~p"/sign-in")
 
     {:noreply, socket}
   end
 
   # Component communication handlers
   @impl Phoenix.LiveView
-  def handle_info({:editor_update, update_data}, socket) do
+  def handle_info({:editor_update, _update_data}, socket) do
     # Handle editor component updates
     # TODO: Broadcast to other users via channels
     {:noreply, socket}
   end
 
   @impl Phoenix.LiveView
-  def handle_info({:chat_message, message_data}, socket) do
+  def handle_info({:chat_message, _message_data}, socket) do
     # Handle chat component updates
     # TODO: Send to Duck agent via LLM channel
     {:noreply, socket}
   end
 
   @impl Phoenix.LiveView
-  def handle_info({:presence_update, presence_data}, socket) do
+  def handle_info({:presence_update, _presence_data}, socket) do
     # Handle user presence updates
+    {:noreply, socket}
+  end
+
+  # Handle system broadcast messages from Phoenix Channels
+  @impl Phoenix.LiveView
+  def handle_info(%Phoenix.Socket.Broadcast{event: "new_system_message", payload: payload}, socket) do
+    # Forward system message to chat component
+    send_update(ChatComponent, id: "chat-desktop", system_message: payload)
+    send_update(ChatComponent, id: "chat-mobile", system_message: payload)
+    
+    {:noreply, socket}
+  end
+
+  # Handle new chat messages from Phoenix Channels
+  @impl Phoenix.LiveView
+  def handle_info(%Phoenix.Socket.Broadcast{event: "new_chat_message", payload: payload}, socket) do
+    # Forward chat message to chat component
+    send_update(ChatComponent, id: "chat-desktop", new_message: payload)
+    send_update(ChatComponent, id: "chat-mobile", new_message: payload)
+    
     {:noreply, socket}
   end
 
   # Private functions
 
   defp authenticate_user(session) do
+    # Check for demo user first
+    if demo_user = session["current_user"] do
+      if demo_user[:is_demo] == true do
+        {:ok, demo_user}
+      else
+        authenticate_regular_user(session)
+      end
+    else
+      authenticate_regular_user(session)
+    end
+  end
+
+  defp authenticate_regular_user(session) do
     with token when is_binary(token) <- session["user_token"],
          {:ok, user, _claims} <- AshAuthentication.Jwt.verify(token, RubberduckWeb.Accounts.User) do
       {:ok, user}
@@ -133,22 +184,34 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
   end
 
   defp create_or_join_session(session_id, user_id) do
-    # Try to find existing session first
-    case RubberduckWeb.Collaborative.get_by_session_id(session_id) do
-      {:ok, nil} ->
-        # Create new session
-        RubberduckWeb.Collaborative.start_session(%{
-          session_id: session_id,
-          creator_id: user_id,
-          session_name: "Collaborative Session"
-        })
+    # For demo users, create a temporary session
+    if is_binary(user_id) && String.starts_with?(user_id, "demo_") do
+      {:ok, %{
+        id: session_id,
+        session_id: session_id,
+        creator_id: user_id,
+        session_name: "Demo Collaborative Session",
+        is_demo: true,
+        created_at: DateTime.utc_now()
+      }}
+    else
+      # Try to find existing session first
+      case RubberduckWeb.Collaborative.get_by_session_id(session_id) do
+        {:ok, nil} ->
+          # Create new session
+          RubberduckWeb.Collaborative.start_session(%{
+            session_id: session_id,
+            creator_id: user_id,
+            session_name: "Collaborative Session"
+          })
 
-      {:ok, existing_session} ->
-        # Join existing session
-        RubberduckWeb.Collaborative.join_session(existing_session, %{user_id: user_id})
+        {:ok, existing_session} ->
+          # Join existing session
+          RubberduckWeb.Collaborative.join_session(existing_session, %{user_id: user_id})
 
-      {:error, reason} ->
-        {:error, reason}
+        {:error, reason} ->
+          {:error, reason}
+      end
     end
   rescue
     error ->
@@ -179,7 +242,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
     }
   end
 
-  defp apply_params(socket, params) do
+  defp apply_params(socket, _params) do
     # Handle URL parameters for sharing sessions, deep linking, etc.
     socket
   end
@@ -209,7 +272,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
     )
   end
 
-  defp persist_layout_preferences(socket, layout_config) do
+  defp persist_layout_preferences(socket, _layout_config) do
     # TODO: Persist user layout preferences
     # Could use browser localStorage via push_event or user preferences in DB
     socket

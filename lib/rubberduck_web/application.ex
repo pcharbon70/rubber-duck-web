@@ -11,6 +11,8 @@ defmodule RubberduckWeb.Application do
       RubberduckWebWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:rubberduck_web, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: RubberduckWeb.PubSub},
+      # Start Presence for tracking users in collaborative sessions
+      RubberduckWebWeb.Presence,
       # Start a worker by calling: RubberduckWeb.Worker.start_link(arg)
       # {RubberduckWeb.Worker, arg},
       # Start to serve requests, typically the last entry
