@@ -22,7 +22,9 @@ defmodule RubberduckWeb.Accounts.User.Senders.SendPasswordResetEmail do
   end
 
   defp body(params) do
-    url = url(~p"/password-reset/#{params[:token]}")
+    # TODO: Add proper password reset route
+    # url = url(~p"/password-reset/#{params[:token]}")
+    url = "http://localhost:5545/auth/user/password_reset?token=#{params[:token]}"
 
     """
     <p>Click this link to reset your password:</p>

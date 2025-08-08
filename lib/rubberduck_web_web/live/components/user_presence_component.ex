@@ -1,7 +1,7 @@
 defmodule RubberduckWebWeb.CollaborativeCodingLive.UserPresenceComponent do
   @moduledoc """
   LiveView component for user presence tracking.
-  
+
   Displays active users in the collaborative session (excluding Duck).
   """
 
@@ -28,7 +28,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive.UserPresenceComponent do
   end
 
   @impl Phoenix.LiveComponent
-  def handle_event("toggle_user_info", %{"user_id" => user_id}, socket) do
+  def handle_event("toggle_user_info", %{"user_id" => _user_id}, socket) do
     # Toggle expanded user info view
     {:noreply, socket}
   end
@@ -38,51 +38,54 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive.UserPresenceComponent do
     ~H"""
     <div class="presence-container h-full bg-base-100">
       
-      <!-- Presence header -->
+    <!-- Presence header -->
       <div class="presence-header px-4 py-3 border-b border-base-300">
         <h3 class="text-sm font-semibold text-base-content flex items-center gap-2">
           👥 Active Users
           <div class="badge badge-neutral badge-sm">
-            <%= user_count(@active_users) %>
+            {user_count(@active_users)}
           </div>
         </h3>
       </div>
-
-      <!-- Users list -->
+      
+    <!-- Users list -->
       <div class="users-list space-y-2 p-3">
         
-        <!-- Current user (you) -->
+    <!-- Current user (you) -->
         <div class="card card-compact bg-primary/10 border border-primary/20">
           <div class="card-body">
             <div class="flex items-center gap-3">
               <div class="avatar placeholder">
                 <div class="bg-primary text-primary-content w-8 rounded-full">
                   <span class="text-xs font-bold">
-                    <%= String.first(@user.email) |> String.upcase() %>
+                    {String.first(@user.email) |> String.upcase()}
                   </span>
                 </div>
               </div>
-              
+
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
                   <p class="text-sm font-semibold text-base-content">You</p>
                   <div class="badge badge-primary badge-sm">Host</div>
                 </div>
                 <p class="text-xs text-base-content/60 truncate">
-                  <%= @user.email %>
+                  {@user.email}
                 </p>
               </div>
-              
+
               <div class="indicator">
-                <span class="indicator-item badge badge-success badge-xs" 
-                      title="Online"
-                      aria-label="Online"></span>
+                <span
+                  class="indicator-item badge badge-success badge-xs"
+                  title="Online"
+                  aria-label="Online"
+                >
+                </span>
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Other active users -->
+        
+    <!-- Other active users -->
         <%= for {user_id, user_data} <- @active_users do %>
           <%= if user_id != @user.id do %>
             <div class="card card-compact bg-base-200 hover:bg-base-300 transition-colors">
@@ -93,51 +96,54 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive.UserPresenceComponent do
                       "w-8 rounded-full text-white text-xs font-medium",
                       user_avatar_color(user_data)
                     ]}>
-                      <span><%= user_avatar_text(user_data) %></span>
+                      <span>{user_avatar_text(user_data)}</span>
                     </div>
                     
-                    <!-- Typing indicator -->
+    <!-- Typing indicator -->
                     <%= if user_data[:typing] do %>
                       <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent rounded-full border-2 border-base-100">
                         <span class="loading loading-ring loading-xs"></span>
                       </div>
                     <% end %>
                   </div>
-                  
+
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
                       <p class="text-sm font-medium text-base-content truncate">
-                        <%= user_data.name || "Anonymous" %>
+                        {user_data.name || "Anonymous"}
                       </p>
                       <%= if user_data[:cursor_position] do %>
                         <div class="badge badge-ghost badge-xs">
-                          Line <%= user_data.cursor_position.line %>
+                          Line {user_data.cursor_position.line}
                         </div>
                       <% end %>
                     </div>
-                    
+
                     <%= if user_data.email do %>
                       <p class="text-xs text-base-content/60 truncate">
-                        <%= user_data.email %>
+                        {user_data.email}
                       </p>
                     <% end %>
                   </div>
-                  
+
                   <div class="indicator">
-                    <span class={[
-                      "indicator-item badge badge-xs",
-                      user_status_badge_class(user_data)
-                    ]}
-                    title={user_status_text(user_data)}
-                    aria-label={user_status_text(user_data)}></span>
+                    <span
+                      class={[
+                        "indicator-item badge badge-xs",
+                        user_status_badge_class(user_data)
+                      ]}
+                      title={user_status_text(user_data)}
+                      aria-label={user_status_text(user_data)}
+                    >
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           <% end %>
         <% end %>
-
-        <!-- Duck agent representation -->
+        
+    <!-- Duck agent representation -->
         <div class="card card-compact bg-warning/10 border border-warning/20">
           <div class="card-body">
             <div class="flex items-center gap-3">
@@ -146,7 +152,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive.UserPresenceComponent do
                   <img src="/images/rubberduck.svg" alt="Duck" class="w-4 h-4" />
                 </div>
               </div>
-              
+
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
                   <p class="text-sm font-semibold text-base-content">
@@ -158,20 +164,23 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive.UserPresenceComponent do
                   Your coding assistant
                 </p>
               </div>
-              
+
               <div class="indicator">
-                <span class={[
-                  "indicator-item badge badge-xs",
-                  duck_status_badge_class(@duck_agent.status)
-                ]}
-                title={duck_status_text(@duck_agent.status)}
-                aria-label={duck_status_text(@duck_agent.status)}></span>
+                <span
+                  class={[
+                    "indicator-item badge badge-xs",
+                    duck_status_badge_class(@duck_agent.status)
+                  ]}
+                  title={duck_status_text(@duck_agent.status)}
+                  aria-label={duck_status_text(@duck_agent.status)}
+                >
+                </span>
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Empty state when no other users -->
+        
+    <!-- Empty state when no other users -->
         <%= if user_count(@active_users) <= 1 do %>
           <div class="card bg-base-200">
             <div class="card-body items-center text-center">
@@ -181,20 +190,20 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive.UserPresenceComponent do
             </div>
           </div>
         <% end %>
-
       </div>
-
-      <!-- Session info footer -->
+      
+    <!-- Session info footer -->
       <div class="border-t border-base-300 p-3">
         <div class="flex items-center justify-between text-xs text-base-content/60">
-          <span>Session: <%= String.slice(@session_id, 0, 8) %>...</span>
+          <span>Session: {String.slice(@session_id, 0, 8)}...</span>
           <div class="flex items-center gap-1">
             <div class="indicator">
               <span class={[
                 "indicator-item badge badge-xs",
                 connection_status_badge_class(@connection_state)
-              ]}></span>
-              <span><%= connection_status_text(@connection_state) %></span>
+              ]}>
+              </span>
+              <span>{connection_status_text(@connection_state)}</span>
             </div>
           </div>
         </div>
@@ -208,7 +217,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive.UserPresenceComponent do
   defp update_presence_state(socket) do
     # TODO: Integrate with Phoenix.Presence to get real presence data
     # For now, simulate with current user only
-    
+
     active_users = %{
       socket.assigns.user.id => %{
         name: String.split(socket.assigns.user.email, "@") |> List.first() |> String.capitalize(),
@@ -216,7 +225,8 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive.UserPresenceComponent do
         status: :online,
         cursor_position: %{line: 1, column: 1},
         typing: false,
-        color: "#3B82F6"  # Blue color for current user
+        # Blue color for current user
+        color: "#3B82F6"
       }
     }
 

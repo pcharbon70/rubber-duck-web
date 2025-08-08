@@ -7,9 +7,9 @@ defmodule RubberduckWebWeb.Components.RubberDuckSVG do
 
   @doc """
   Renders a rubber duck SVG at the specified size.
-  
+
   ## Examples
-  
+
       <.rubber_duck size="lg" />
       <.rubber_duck size="md" class="inline-block" />
       <.rubber_duck size="sm" />
@@ -20,20 +20,21 @@ defmodule RubberduckWebWeb.Components.RubberDuckSVG do
   attr :rest, :global
 
   def rubber_duck(assigns) do
-    size_class = case assigns.size do
-      "lg" -> "w-32 h-32"
-      "md" -> "w-20 h-20"
-      "sm" -> "w-8 h-8"
-      _ -> ""
-    end
-    
+    size_class =
+      case assigns.size do
+        "lg" -> "w-32 h-32"
+        "md" -> "w-20 h-20"
+        "sm" -> "w-8 h-8"
+        _ -> ""
+      end
+
     assigns = assign(assigns, :size_class, size_class)
-    
+
     ~H"""
-    <img 
+    <img
       src="/images/rubberduck.svg"
       alt="RubberDuck Logo"
-      class={[@size_class, @class]} 
+      class={[@size_class, @class]}
       {@rest}
     />
     """

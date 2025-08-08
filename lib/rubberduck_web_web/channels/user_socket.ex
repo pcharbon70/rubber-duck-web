@@ -1,7 +1,7 @@
 defmodule RubberduckWebWeb.UserSocket do
   @moduledoc """
   Phoenix Socket for authenticated users.
-  
+
   Handles WebSocket connections for collaborative features including:
   - System broadcasts
   - LLM chat
@@ -22,7 +22,7 @@ defmodule RubberduckWebWeb.UserSocket do
         socket = assign(socket, :user_id, user.id)
         socket = assign(socket, :user, user)
         {:ok, socket}
-        
+
       {:error, _reason} ->
         :error
     end

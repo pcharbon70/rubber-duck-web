@@ -12,7 +12,7 @@ defmodule RubberduckWebWeb.AuthController do
   """
   def success(conn, _activity, user, _token) do
     return_to = get_session(conn, :return_to) || ~p"/code"
-    
+
     conn
     |> delete_session(:return_to)
     |> store_in_session(user)
@@ -26,13 +26,14 @@ defmodule RubberduckWebWeb.AuthController do
   Shows an error message and redirects back to sign in.
   """
   def failure(conn, _activity, reason) do
-    message = case reason do
-      :invalid_credentials -> "Invalid email or password"
-      :user_not_found -> "No account found with that email"
-      :account_locked -> "Your account has been locked"
-      _ -> "Authentication failed. Please try again."
-    end
-    
+    message =
+      case reason do
+        :invalid_credentials -> "Invalid email or password"
+        :user_not_found -> "No account found with that email"
+        :account_locked -> "Your account has been locked"
+        _ -> "Authentication failed. Please try again."
+      end
+
     conn
     |> put_flash(:error, message)
     |> redirect(to: ~p"/sign-in")
@@ -44,7 +45,7 @@ defmodule RubberduckWebWeb.AuthController do
   """
   def sign_out(conn, _params) do
     return_to = get_session(conn, :return_to) || ~p"/"
-    
+
     conn
     |> clear_session(:rubberduck_web)
     |> put_flash(:info, "You have been signed out successfully.")

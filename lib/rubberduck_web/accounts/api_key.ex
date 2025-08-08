@@ -1,4 +1,8 @@
 defmodule RubberduckWeb.Accounts.ApiKey do
+  @moduledoc """
+  API key resource for programmatic access.
+  """
+
   use Ash.Resource,
     otp_app: :rubberduck_web,
     domain: RubberduckWeb.Accounts,

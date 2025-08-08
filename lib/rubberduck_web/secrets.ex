@@ -1,4 +1,8 @@
 defmodule RubberduckWeb.Secrets do
+  @moduledoc """
+  Secret provider for Ash authentication.
+  """
+
   use AshAuthentication.Secret
 
   def secret_for(

@@ -1,7 +1,7 @@
 defmodule RubberduckWebWeb.CollaborativeCodingLive do
   @moduledoc """
   Main LiveView for the collaborative coding platform.
-  
+
   Provides the primary interface combining:
   - LLM chat assistance (user ↔ Duck agent)
   - Multi-user collaborative code editing
@@ -10,11 +10,9 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
 
   use RubberduckWebWeb, :live_view
 
-  alias RubberduckWeb.Collaborative.Session
   alias RubberduckWebWeb.CollaborativeCodingLive.{
-    EditorComponent,
     ChatComponent,
-    UserPresenceComponent
+    EditorComponent
   }
 
   @impl Phoenix.LiveView
@@ -22,7 +20,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
     case authenticate_user(session) do
       {:ok, user} ->
         session_id = generate_session_id()
-        
+
         socket =
           socket
           |> assign(:user, user)
@@ -36,6 +34,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
 
         # Create or join collaborative session
         user_id = if is_map(user) && Map.has_key?(user, :id), do: user.id, else: user[:id]
+
         case create_or_join_session(session_id, user_id) do
           {:ok, session_record} ->
             # Initialize active users with current user
@@ -48,7 +47,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
                 color: "#3B82F6"
               }
             }
-            
+
             socket =
               socket
               |> assign(:session_record, session_record)
@@ -57,13 +56,18 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
 
             # Subscribe to Phoenix Channels for real-time updates
             session_id = socket.assigns.session_id
-            Phoenix.PubSub.subscribe(RubberduckWeb.PubSub, "session:#{session_id}:system_broadcast")
+
+            Phoenix.PubSub.subscribe(
+              RubberduckWeb.PubSub,
+              "session:#{session_id}:system_broadcast"
+            )
+
             Phoenix.PubSub.subscribe(RubberduckWeb.PubSub, "session:#{session_id}:llm_chat")
-            
+
             {:ok, socket}
 
           {:error, reason} ->
-            {:ok, 
+            {:ok,
              socket
              |> put_flash(:error, "Failed to create session: #{inspect(reason)}")
              |> assign(:connection_state, :error)}
@@ -84,7 +88,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
     # Validate and constrain the layout configuration
     validated_config = validate_layout_config(config)
     layout_config = merge_layout_config(socket.assigns.layout_config, validated_config)
-    
+
     socket =
       socket
       |> assign(:layout_config, layout_config)
@@ -96,21 +100,22 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
   @impl Phoenix.LiveView
   def handle_event("toggle_panel", %{"panel" => panel}, socket) do
     layout_config = toggle_panel_visibility(socket.assigns.layout_config, panel)
-    
+
     socket = assign(socket, :layout_config, layout_config)
     {:noreply, socket}
   end
-  
+
   @impl Phoenix.LiveView
-  def handle_event("layout_restored", %{"layout" => layout_data}, socket) when is_map(layout_data) do
+  def handle_event("layout_restored", %{"layout" => layout_data}, socket)
+      when is_map(layout_data) do
     # Apply restored layout from localStorage
     validated_config = validate_layout_config(layout_data)
     layout_config = merge_layout_config(socket.assigns.layout_config, validated_config)
-    
+
     socket = assign(socket, :layout_config, layout_config)
     {:noreply, socket}
   end
-  
+
   @impl Phoenix.LiveView
   def handle_event("layout_restored", _params, socket) do
     # No saved layout found, keep defaults
@@ -155,11 +160,14 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
 
   # Handle system broadcast messages from Phoenix Channels
   @impl Phoenix.LiveView
-  def handle_info(%Phoenix.Socket.Broadcast{event: "new_system_message", payload: payload}, socket) do
+  def handle_info(
+        %Phoenix.Socket.Broadcast{event: "new_system_message", payload: payload},
+        socket
+      ) do
     # Forward system message to chat component
     send_update(ChatComponent, id: "chat-desktop", system_message: payload)
     send_update(ChatComponent, id: "chat-mobile", system_message: payload)
-    
+
     {:noreply, socket}
   end
 
@@ -169,7 +177,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
     # Forward chat message to chat component
     send_update(ChatComponent, id: "chat-desktop", new_message: payload)
     send_update(ChatComponent, id: "chat-mobile", new_message: payload)
-    
+
     {:noreply, socket}
   end
 
@@ -205,14 +213,15 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
   defp create_or_join_session(session_id, user_id) do
     # For demo users, create a temporary session
     if is_binary(user_id) && String.starts_with?(user_id, "demo_") do
-      {:ok, %{
-        id: session_id,
-        session_id: session_id,
-        creator_id: user_id,
-        session_name: "Demo Collaborative Session",
-        is_demo: true,
-        created_at: DateTime.utc_now()
-      }}
+      {:ok,
+       %{
+         id: session_id,
+         session_id: session_id,
+         creator_id: user_id,
+         session_name: "Demo Collaborative Session",
+         is_demo: true,
+         created_at: DateTime.utc_now()
+       }}
     else
       # Try to find existing session first
       case RubberduckWeb.Collaborative.get_by_session_id(session_id) do
@@ -259,44 +268,56 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
       mobile_layout: :stacked,
       theme: :dark,
       # Minimum widths in percentages (based on 1200px viewport)
-      min_editor_percent: 33,  # ~400px
-      min_chat_percent: 23,    # ~280px
+      # ~400px
+      min_editor_percent: 33,
+      # ~280px
+      min_chat_percent: 23,
       max_editor_percent: 85,
       max_chat_percent: 67
     }
   end
-  
+
   defp validate_layout_config(config) do
     # Get the widths, using current defaults if not provided
     editor_percent = Map.get(config, "editor_width_percent", 70)
     chat_percent = Map.get(config, "chat_width_percent", 30)
-    
+
     # Ensure they're integers
-    editor_percent = if is_binary(editor_percent), do: String.to_integer(editor_percent), else: editor_percent
-    chat_percent = if is_binary(chat_percent), do: String.to_integer(chat_percent), else: chat_percent
-    
+    editor_percent =
+      if is_binary(editor_percent), do: String.to_integer(editor_percent), else: editor_percent
+
+    chat_percent =
+      if is_binary(chat_percent), do: String.to_integer(chat_percent), else: chat_percent
+
     # Apply constraints
-    editor_percent = max(33, min(85, editor_percent))  # Between 33% and 85%
-    chat_percent = max(23, min(67, chat_percent))      # Between 23% and 67%
-    
+    # Between 33% and 85%
+    editor_percent = max(33, min(85, editor_percent))
+    # Between 23% and 67%
+    chat_percent = max(23, min(67, chat_percent))
+
     # Ensure they add up to 100%
     total = editor_percent + chat_percent
-    if total != 100 do
-      # Adjust chat percentage to make total 100%
-      chat_percent = 100 - editor_percent
-      # Re-validate chat percentage
-      chat_percent = max(23, min(67, chat_percent))
-      # If chat is still invalid, adjust editor too
-      {editor_percent, chat_percent} = if chat_percent < 23 or chat_percent > 67 do
-        {70, 30}  # Default to 70/30
+
+    {final_editor_percent, final_chat_percent} =
+      if total != 100 do
+        # Adjust chat percentage to make total 100%
+        chat_percent = 100 - editor_percent
+        # Re-validate chat percentage
+        chat_percent = max(23, min(67, chat_percent))
+        # If chat is still invalid, adjust editor too
+        if chat_percent < 23 or chat_percent > 67 do
+          # Default to 70/30
+          {70, 30}
+        else
+          {editor_percent, chat_percent}
+        end
       else
         {editor_percent, chat_percent}
       end
-    end
-    
+
     Map.merge(config, %{
-      "editor_width_percent" => editor_percent,
-      "chat_width_percent" => chat_percent
+      "editor_width_percent" => final_editor_percent,
+      "chat_width_percent" => final_chat_percent
     })
   end
 
@@ -309,6 +330,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
     Map.merge(current_config, updates, fn
       :panels, current_panels, update_panels ->
         deep_merge_panels(current_panels, update_panels)
+
       _key, _current, new ->
         new
     end)
@@ -322,7 +344,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
 
   defp toggle_panel_visibility(config, panel_name) do
     panel_atom = String.to_existing_atom(panel_name)
-    
+
     put_in(
       config,
       [:panels, panel_atom, :visible],
@@ -338,7 +360,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
       chat_width_percent: layout_config.chat_width_percent
     })
   end
-  
+
   defp maybe_restore_layout_preferences(socket) do
     # Send a request to restore layout from localStorage
     # The browser will respond with the saved layout or null
@@ -357,22 +379,14 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
     end
   end
 
-  defp connection_status_text(state) do
-    case state do
-      :connected -> "Connected"
-      :connecting -> "Connecting"
-      :disconnected -> "Disconnected"
-      :error -> "Connection Error"
-      _ -> "Unknown"
-    end
-  end
-
   defp connection_issue_message(state) do
     case state do
       :disconnected ->
         "Lost connection to the server. Your work is saved locally and will sync when reconnected."
+
       :error ->
         "Connection error occurred. Please check your network connection and try again."
+
       _ ->
         "Experiencing connection issues. Please wait while we attempt to reconnect."
     end

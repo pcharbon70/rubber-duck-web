@@ -10,7 +10,7 @@
         <.rubber_duck size="lg" class="mx-auto" />
       </div>
       
-      <!-- Title and Subtitle -->
+<!-- Title and Subtitle -->
       <h1 class="text-5xl md:text-7xl font-bold text-base-content mb-6">
         RubberDuck
       </h1>
@@ -21,7 +21,7 @@
         Collaborative coding with real-time AI assistance. Debug faster, code smarter.
       </p>
       
-      <!-- System Status -->
+<!-- System Status -->
       <div class="flex justify-center mb-8">
         <div class="badge badge-success gap-2">
           <div class="w-2 h-2 bg-current rounded-full animate-pulse"></div>
@@ -29,11 +29,12 @@
         </div>
       </div>
       
-      <!-- CTA Buttons -->
+<!-- CTA Buttons -->
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <button 
+        <button
           onclick="auth_modal.showModal()"
-          class="btn btn-primary btn-lg">
+          class="btn btn-primary btn-lg"
+        >
           🚀 Start Coding
         </button>
         <a href="#features" class="btn btn-outline btn-lg">
@@ -41,10 +42,12 @@
         </a>
       </div>
       
-      <!-- Quick Demo Info -->
+<!-- Quick Demo Info -->
       <div class="mt-8 p-4 bg-base-200/50 rounded-lg">
         <p class="text-sm text-base-content/60">
-          🔓 Demo Access: Use <code class="text-primary">rubberduck</code> / <code class="text-primary">rubberduck</code> to login
+          🔓 Demo Access: Use <code class="text-primary">rubberduck</code>
+          / <code class="text-primary">rubberduck</code>
+          to login
         </p>
       </div>
     </div>
@@ -62,7 +65,7 @@
         Experience the future of collaborative programming
       </p>
     </div>
-    
+
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <!-- AI Assistant Feature -->
       <div class="card bg-base-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
@@ -70,7 +73,7 @@
           <div class="text-5xl mb-4">🤖</div>
           <h3 class="card-title text-2xl mb-2">AI Assistant</h3>
           <p class="text-base-content/70">
-            Chat with Duck, your intelligent coding companion. Get instant help with debugging, 
+            Chat with Duck, your intelligent coding companion. Get instant help with debugging,
             code suggestions, and explanations.
           </p>
           <div class="card-actions justify-center mt-4">
@@ -80,13 +83,13 @@
         </div>
       </div>
       
-      <!-- Collaborative Editor Feature -->
+<!-- Collaborative Editor Feature -->
       <div class="card bg-base-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
         <div class="card-body items-center text-center">
           <div class="text-5xl mb-4">👥</div>
           <h3 class="card-title text-2xl mb-2">Collaborative Editor</h3>
           <p class="text-base-content/70">
-            Code together in real-time with Monaco Editor. See live cursors, 
+            Code together in real-time with Monaco Editor. See live cursors,
             share sessions, and collaborate seamlessly.
           </p>
           <div class="card-actions justify-center mt-4">
@@ -96,13 +99,13 @@
         </div>
       </div>
       
-      <!-- Smart Analysis Feature -->
+<!-- Smart Analysis Feature -->
       <div class="card bg-base-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
         <div class="card-body items-center text-center">
           <div class="text-5xl mb-4">🔍</div>
           <h3 class="card-title text-2xl mb-2">Smart Analysis</h3>
           <p class="text-base-content/70">
-            Get intelligent code reviews, optimization suggestions, 
+            Get intelligent code reviews, optimization suggestions,
             and best practice recommendations automatically.
           </p>
           <div class="card-actions justify-center mt-4">
@@ -126,7 +129,7 @@
         Get started in three simple steps
       </p>
     </div>
-    
+
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <!-- Step 1 -->
       <div class="text-center">
@@ -139,7 +142,7 @@
         </p>
       </div>
       
-      <!-- Step 2 -->
+<!-- Step 2 -->
       <div class="text-center">
         <div class="w-16 h-16 mx-auto mb-4 bg-primary text-primary-content rounded-full flex items-center justify-center text-2xl font-bold">
           2
@@ -150,7 +153,7 @@
         </p>
       </div>
       
-      <!-- Step 3 -->
+<!-- Step 3 -->
       <div class="text-center">
         <div class="w-16 h-16 mx-auto mb-4 bg-primary text-primary-content rounded-full flex items-center justify-center text-2xl font-bold">
           3
@@ -176,7 +179,7 @@
         <div class="stat-value text-primary">&lt; 100ms</div>
         <div class="stat-desc">Real-time collaboration</div>
       </div>
-      
+
       <div class="stat">
         <div class="stat-figure text-secondary">
           <div class="text-3xl">🧠</div>
@@ -185,7 +188,7 @@
         <div class="stat-value text-secondary">GPT-4</div>
         <div class="stat-desc">Latest AI technology</div>
       </div>
-      
+
       <div class="stat">
         <div class="stat-figure text-accent">
           <div class="text-3xl">🔒</div>
@@ -207,9 +210,10 @@
     <p class="text-xl text-primary-content/90 mb-8">
       Join developers who are already coding smarter with RubberDuck
     </p>
-    <button 
+    <button
       onclick="auth_modal.showModal()"
-      class="btn btn-lg bg-base-100 text-base-content hover:bg-base-200">
+      class="btn btn-lg bg-base-100 text-base-content hover:bg-base-200"
+    >
       Get Started Now
     </button>
   </div>
@@ -242,57 +246,56 @@
     <form method="dialog">
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
     </form>
-    
+
     <h3 class="font-bold text-2xl mb-6 text-center flex items-center justify-center gap-2">
-      Welcome Back! 
-      <.rubber_duck size="sm" class="inline-block" />
+      Welcome Back! <.rubber_duck size="sm" class="inline-block" />
     </h3>
-    
+
     <form action="/demo-login" method="post" class="space-y-4">
       <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
-      
+
       <div class="form-control">
         <label class="label">
           <span class="label-text">Username</span>
         </label>
-        <input 
-          type="text" 
-          name="username" 
-          placeholder="Enter username" 
-          class="input input-bordered w-full" 
-          required 
+        <input
+          type="text"
+          name="username"
+          placeholder="Enter username"
+          class="input input-bordered w-full"
+          required
           autofocus
         />
         <label class="label">
           <span class="label-text-alt text-info">Hint: try "rubberduck"</span>
         </label>
       </div>
-      
+
       <div class="form-control">
         <label class="label">
           <span class="label-text">Password</span>
         </label>
-        <input 
-          type="password" 
-          name="password" 
-          placeholder="Enter password" 
-          class="input input-bordered w-full" 
+        <input
+          type="password"
+          name="password"
+          placeholder="Enter password"
+          class="input input-bordered w-full"
           required
         />
         <label class="label">
           <span class="label-text-alt text-info">Hint: same as username</span>
         </label>
       </div>
-      
+
       <div class="form-control mt-6">
         <button type="submit" class="btn btn-primary w-full">
           Sign In
         </button>
       </div>
     </form>
-    
+
     <div class="divider">OR</div>
-    
+
     <div class="text-center">
       <p class="text-sm text-base-content/60 mb-4">
         New to RubberDuck?
@@ -302,7 +305,7 @@
       </button>
     </div>
   </div>
-  
+
   <form method="dialog" class="modal-backdrop">
     <button>close</button>
   </form>
@@ -314,21 +317,21 @@
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-20px); }
   }
-  
+
   .float-animation {
     animation: float 3s ease-in-out infinite;
   }
-  
+
   /* Smooth scroll */
   html {
     scroll-behavior: smooth;
   }
-  
+
   /* Card hover effects */
   .card {
     transition: all 0.3s ease;
   }
-  
+
   /* Button press effect */
   .btn:active {
     transform: scale(0.95);
@@ -347,7 +350,7 @@
       }
     });
   });
-  
+
   // Auto-focus username field when modal opens
   const authModal = document.getElementById('auth_modal');
   authModal.addEventListener('shown.bs.modal', () => {

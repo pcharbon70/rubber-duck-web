@@ -1,4 +1,8 @@
 defmodule RubberduckWeb.Accounts.Token do
+  @moduledoc """
+  Authentication token resource.
+  """
+
   use Ash.Resource,
     otp_app: :rubberduck_web,
     domain: RubberduckWeb.Accounts,

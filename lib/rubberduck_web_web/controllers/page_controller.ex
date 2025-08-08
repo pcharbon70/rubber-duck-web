@@ -19,10 +19,10 @@ defmodule RubberduckWebWeb.PageController do
         role: :administrator,
         is_demo: true
       }
-      
+
       # Generate a simple session token (in production, use proper JWT)
       token = Base.encode64(:crypto.strong_rand_bytes(32))
-      
+
       conn
       |> put_session(:user_token, token)
       |> put_session(:current_user, demo_user)
@@ -30,7 +30,10 @@ defmodule RubberduckWebWeb.PageController do
       |> redirect(to: ~p"/code")
     else
       conn
-      |> put_flash(:error, "Invalid credentials. Use 'rubberduck' for both username and password.")
+      |> put_flash(
+        :error,
+        "Invalid credentials. Use 'rubberduck' for both username and password."
+      )
       |> redirect(to: ~p"/")
     end
   end

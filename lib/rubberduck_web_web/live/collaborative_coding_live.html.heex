@@ -1,15 +1,23 @@
-<div class="collaborative-interface h-screen bg-base-200 flex flex-col"
-     role="main" 
-     aria-label="Collaborative coding environment">
-     
-  <!-- Skip links for accessibility -->
+<div
+  class="collaborative-interface h-screen bg-base-200 flex flex-col"
+  role="main"
+  aria-label="Collaborative coding environment"
+>
+  
+<!-- Skip links for accessibility -->
   <div class="skip-links sr-only focus:not-sr-only">
-    <a href="#chat-panel" class="btn btn-primary focus:absolute focus:top-0 focus:left-0 z-50">Skip to Chat</a>
-    <a href="#code-editor" class="btn btn-primary focus:absolute focus:top-8 focus:left-0 z-50">Skip to Code Editor</a>
-    <a href="#user-presence" class="btn btn-primary focus:absolute focus:top-16 focus:left-0 z-50">Skip to User List</a>
+    <a href="#chat-panel" class="btn btn-primary focus:absolute focus:top-0 focus:left-0 z-50">
+      Skip to Chat
+    </a>
+    <a href="#code-editor" class="btn btn-primary focus:absolute focus:top-8 focus:left-0 z-50">
+      Skip to Code Editor
+    </a>
+    <a href="#user-presence" class="btn btn-primary focus:absolute focus:top-16 focus:left-0 z-50">
+      Skip to User List
+    </a>
   </div>
-
-  <!-- Navbar Header -->
+  
+<!-- Navbar Header -->
   <header class="navbar bg-base-100 border-b border-base-300">
     <div class="navbar-start">
       <h1 class="text-xl font-bold text-base-content flex items-center gap-2">
@@ -25,9 +33,10 @@
           <span class={[
             "indicator-item badge badge-xs",
             connection_status_badge_class(@connection_state)
-          ]}></span>
+          ]}>
+          </span>
           <div class="text-sm text-base-content/70">
-            Session: <%= String.slice(@session_id, 0, 8) %>...
+            Session: {String.slice(@session_id, 0, 8)}...
           </div>
         </div>
       </div>
@@ -36,52 +45,61 @@
     <div class="navbar-end">
       <!-- Mobile panel toggles -->
       <div class="md:hidden flex gap-1">
-        <button phx-click="toggle_panel" 
-                phx-value-panel="chat"
-                class="btn btn-ghost btn-sm"
-                aria-label="Toggle chat panel">
+        <button
+          phx-click="toggle_panel"
+          phx-value-panel="chat"
+          class="btn btn-ghost btn-sm"
+          aria-label="Toggle chat panel"
+        >
           💬
         </button>
-        
-        <button phx-click="toggle_panel" 
-                phx-value-panel="editor"
-                class="btn btn-ghost btn-sm"
-                aria-label="Toggle code editor">
+
+        <button
+          phx-click="toggle_panel"
+          phx-value-panel="editor"
+          class="btn btn-ghost btn-sm"
+          aria-label="Toggle code editor"
+        >
           💻
         </button>
       </div>
-
-      <!-- User avatar and menu -->
+      
+<!-- User avatar and menu -->
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar placeholder">
           <div class="bg-primary text-primary-content w-10 rounded-full">
             <span class="text-sm font-medium">
-              <%= String.first(@user.email) |> String.upcase() %>
+              {String.first(@user.email) |> String.upcase()}
             </span>
           </div>
         </div>
-        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-          <li class="menu-title"><%= @user.email %></li>
+        <ul
+          tabindex="0"
+          class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+        >
+          <li class="menu-title">{@user.email}</li>
           <li><a>Settings</a></li>
           <li><a>Sign Out</a></li>
         </ul>
       </div>
     </div>
   </header>
-
-  <!-- Main collaborative interface -->
+  
+<!-- Main collaborative interface -->
   <main class="flex-1 flex min-h-0">
     
-    <!-- Mobile: Stacked layout -->
+<!-- Mobile: Stacked layout -->
     <div class="md:hidden flex flex-col w-full">
       
-      <!-- Chat panel (mobile) -->
+<!-- Chat panel (mobile) -->
       <%= if @layout_config.panels.chat.visible do %>
-        <section id="chat-panel-mobile" 
-                 class="flex-1 border-b border-base-300"
-                 role="region" 
-                 aria-label="AI Assistant Chat">
-          <.live_component 
+        <section
+          id="chat-panel-mobile"
+          class="flex-1 border-b border-base-300"
+          role="region"
+          aria-label="AI Assistant Chat"
+        >
+          <.live_component
             module={ChatComponent}
             id="chat-mobile"
             user={@user}
@@ -89,69 +107,81 @@
             duck_agent={@duck_agent}
             active_users={@active_users}
             connection_state={@connection_state}
-            layout="mobile" />
+            layout="mobile"
+          />
         </section>
       <% end %>
       
-      <!-- Editor panel (mobile) -->
+<!-- Editor panel (mobile) -->
       <%= if @layout_config.panels.editor.visible do %>
-        <section id="code-editor-mobile" 
-                 class="flex-1"
-                 role="region" 
-                 aria-label="Code Editor">
-          <.live_component 
+        <section
+          id="code-editor-mobile"
+          class="flex-1"
+          role="region"
+          aria-label="Code Editor"
+        >
+          <.live_component
             module={EditorComponent}
             id="editor-mobile"
             user={@user}
             session_id={@session_id}
             connection_state={@connection_state}
-            layout="mobile" />
+            layout="mobile"
+          />
         </section>
       <% end %>
-      
     </div>
-
-    <!-- Desktop: Side-by-side layout with resize handle -->
+    
+<!-- Desktop: Side-by-side layout with resize handle -->
     <div class="hidden md:flex w-full collaborative-panels">
       
-      <!-- Editor panel (desktop) -->
+<!-- Editor panel (desktop) -->
       <%= if @layout_config.panels.editor.visible do %>
-        <section id="code-editor" 
-                 class="flex-none min-w-0"
-                 role="region" 
-                 aria-label="Code Editor"
-                 style={"width: #{@layout_config.editor_width_percent}%"}>
-          <.live_component 
+        <section
+          id="code-editor"
+          class="flex-none min-w-0"
+          role="region"
+          aria-label="Code Editor"
+          style={"width: #{@layout_config.editor_width_percent}%"}
+        >
+          <.live_component
             module={EditorComponent}
             id="editor-desktop"
             user={@user}
             session_id={@session_id}
             connection_state={@connection_state}
-            layout="desktop" />
+            layout="desktop"
+          />
         </section>
       <% end %>
-
-      <!-- Resize Handle -->
-      <div class="resize-handle flex-none w-1 bg-base-300 hover:bg-primary/20 hover:w-2 transition-all duration-200 cursor-col-resize"
-           phx-hook="ResizeHandle"
-           id="resize-handle"
-           title="Drag to resize panels (Double-click to reset to 70/30)">
+      
+<!-- Resize Handle -->
+      <div
+        class="resize-handle flex-none w-1 bg-base-300 hover:bg-primary/20 hover:w-2 transition-all duration-200 cursor-col-resize"
+        phx-hook="ResizeHandle"
+        id="resize-handle"
+        title="Drag to resize panels (Double-click to reset to 70/30)"
+      >
         <div class="w-full h-full flex items-center justify-center">
           <div class="w-0.5 h-8 bg-base-content/20 rounded-full"></div>
         </div>
       </div>
-
-      <!-- Chat and Presence sidebar -->
-      <aside class="chat-sidebar flex flex-col flex-1 min-w-0 bg-base-100"
-             style={"width: #{@layout_config.chat_width_percent}%"}>
+      
+<!-- Chat and Presence sidebar -->
+      <aside
+        class="chat-sidebar flex flex-col flex-1 min-w-0 bg-base-100"
+        style={"width: #{@layout_config.chat_width_percent}%"}
+      >
         
-        <!-- Chat panel (desktop) -->
+<!-- Chat panel (desktop) -->
         <%= if @layout_config.panels.chat.visible do %>
-          <section id="chat-panel" 
-                   class="flex-1 min-h-0"
-                   role="region" 
-                   aria-label="AI Assistant Chat">
-            <.live_component 
+          <section
+            id="chat-panel"
+            class="flex-1 min-h-0"
+            role="region"
+            aria-label="AI Assistant Chat"
+          >
+            <.live_component
               module={ChatComponent}
               id="chat-desktop"
               user={@user}
@@ -159,23 +189,24 @@
               duck_agent={@duck_agent}
               active_users={@active_users}
               connection_state={@connection_state}
-              layout="desktop" />
+              layout="desktop"
+            />
           </section>
         <% end %>
-
-        <!-- User presence panel (now integrated in chat component) -->
         
+<!-- User presence panel (now integrated in chat component) -->
+
       </aside>
     </div>
   </main>
-
-  <!-- Connection status modal for critical issues -->
+  
+<!-- Connection status modal for critical issues -->
   <%= if @connection_state in [:disconnected, :error] do %>
     <div class="modal modal-open">
       <div class="modal-box">
         <h2 class="text-lg font-bold mb-4">🔌 Connection Issue</h2>
         <p class="text-base-content/70 mb-6">
-          <%= connection_issue_message(@connection_state) %>
+          {connection_issue_message(@connection_state)}
         </p>
         <div class="modal-action">
           <button class="btn btn-primary" onclick="window.location.reload()">
@@ -186,7 +217,6 @@
       <div class="modal-backdrop bg-black/50"></div>
     </div>
   <% end %>
-
 </div>
 
 <script>
@@ -203,7 +233,7 @@
       console.warn('Could not persist layout to localStorage:', error);
     }
   });
-  
+
   window.addEventListener('phx:restore_layout', () => {
     try {
       const savedLayout = localStorage.getItem('rubberduck_layout_config');
@@ -221,7 +251,7 @@
       window.liveSocket.pushEvent('layout_restored', {});
     }
   });
-  
+
   // Keyboard shortcuts for quick resizing
   document.addEventListener('keydown', (event) => {
     // Ctrl/Cmd + 1-4 for preset layouts

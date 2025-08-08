@@ -22,7 +22,9 @@ defmodule RubberduckWeb.Accounts.User.Senders.SendNewUserConfirmationEmail do
   end
 
   defp body(params) do
-    url = url(~p"/confirm_new_user/#{params[:token]}")
+    # TODO: Add proper confirmation route
+    # url = url(~p"/confirm_new_user/#{params[:token]}")
+    url = "http://localhost:5545/auth/user/confirm_new_user?token=#{params[:token]}"
 
     """
     <p>Click this link to confirm your email:</p>

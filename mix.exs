@@ -46,6 +46,7 @@ defmodule RubberduckWeb.MixProject do
       {:safe_code, "~> 0.2"},
       {:live_monaco_editor, "~> 0.1"},
       {:sourceror, "~> 1.8", only: [:dev, :test]},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:tidewave, "~> 0.3", only: [:dev]},
       {:live_debugger, "~> 0.3", only: [:dev]},
       {:ash_admin, "~> 0.13"},
@@ -96,7 +97,13 @@ defmodule RubberduckWeb.MixProject do
         "esbuild rubberduck_web --minify",
         "phx.digest"
       ],
-      precommit: ["compile --warning-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: [
+        "compile --warning-as-errors",
+        "deps.unlock --unused",
+        "format",
+        "credo --strict",
+        "test"
+      ]
     ]
   end
 end
