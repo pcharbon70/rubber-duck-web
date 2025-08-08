@@ -1,5 +1,8 @@
 defmodule RubberduckWebWeb.Router do
   use RubberduckWebWeb, :router
+  use AshAuthentication.Phoenix.Router
+  
+  import AshAuthentication.Plug.Helpers
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -8,16 +11,38 @@ defmodule RubberduckWebWeb.Router do
     plug :put_root_layout, html: {RubberduckWebWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :load_from_session
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :load_from_bearer
   end
 
   scope "/", RubberduckWebWeb do
     pipe_through :browser
 
     get "/", PageController, :home
+    
+    # Demo authentication routes
+    post "/demo-login", PageController, :demo_login
+    post "/demo-logout", PageController, :demo_logout
+    
+    # Authentication routes with DaisyUI overrides
+    auth_routes AuthController, RubberduckWeb.Accounts.User, path: "/auth"
+    sign_out_route AuthController
+    
+    # Sign in page with custom DaisyUI styling
+    sign_in_route(
+      overrides: [
+        RubberduckWebWeb.Auth.DaisyUIOverrides, 
+        AshAuthentication.Phoenix.Overrides.Default
+      ],
+      register_path: "/register",
+      reset_path: "/password-reset"
+    )
+    
+    # Protected routes
     live "/code", CollaborativeCodingLive
   end
 

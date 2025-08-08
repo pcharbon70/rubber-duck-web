@@ -14,12 +14,14 @@ Establish the foundational infrastructure for a hybrid collaborative coding plat
 - [ ] Add basic error handling and connection recovery
 
 ### 1.1.2 Component Architecture Setup  
-- [ ] Create `EditorComponent` LiveView component for Monaco integration
-- [ ] Create `ChatComponent` LiveView component for LLM interaction
-- [ ] Create `UserPresenceComponent` for collaborative user tracking
-- [ ] Set up component communication patterns using send_update/3
-- [ ] Implement component-specific socket assigns and state management
-- [ ] Add component lifecycle management (mount, update, terminate)
+- [x] Create `EditorComponent` LiveView component for Monaco integration
+- [x] Create `ChatComponent` LiveView component for LLM interaction with horizontal split:
+  - [x] System broadcast area (top 20%) for server notifications
+  - [x] Conversation area (bottom 80%) for user ↔ Duck chat
+- [x] Create `UserPresenceComponent` for collaborative user tracking
+- [x] Set up component communication patterns using send_update/3
+- [x] Implement component-specific socket assigns and state management
+- [x] Add component lifecycle management (mount, update, terminate)
 
 ### 1.1.3 Session and User Management
 - [ ] Integrate with existing Ash authentication system
@@ -101,14 +103,14 @@ Establish the foundational infrastructure for a hybrid collaborative coding plat
 
 ### 1.4.3 Channel Topic Organization
 ```elixir
-# Planned topic structure:
-"session:#{session_id}:llm_chat"        # User ↔ Duck communication
-"session:#{session_id}:editor"          # Multi-user editor collaboration  
-"session:#{session_id}:presence"        # User presence tracking
-"session:#{session_id}:system"          # System notifications
+# Updated topic structure with horizontal chat split:
+"session:#{session_id}:system_broadcast"  # Server → UI system notifications (20% area)
+"session:#{session_id}:llm_chat"          # User ↔ Duck communication (80% area)
+"session:#{session_id}:editor"            # Multi-user editor collaboration  
+"session:#{session_id}:presence"          # User presence tracking
 ```
 - [ ] Create topic naming conventions and validation
-- [ ] Implement topic-based message routing
+- [ ] Implement topic-based message routing for dual chat areas
 - [ ] Add topic subscription and unsubscription management
 - [ ] Create topic-specific authorization rules
 - [ ] Set up topic cleanup and garbage collection

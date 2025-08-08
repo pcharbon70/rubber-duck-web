@@ -143,7 +143,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive.UserPresenceComponent do
             <div class="flex items-center gap-3">
               <div class="avatar placeholder">
                 <div class="bg-warning text-warning-content w-8 rounded-full">
-                  <span class="text-sm">🦆</span>
+                  <img src="/images/rubberduck.svg" alt="Duck" class="w-4 h-4" />
                 </div>
               </div>
               
