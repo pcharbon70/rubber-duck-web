@@ -24,6 +24,7 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/rubberduck_web"
 import topbar from "../vendor/topbar"
+import ResizeHandle from "./hooks/resize_handle"
 
 // Monaco Editor Hooks
 const MonacoEditor = {
@@ -95,7 +96,8 @@ const liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
   hooks: {
     ...colocatedHooks,
-    MonacoEditor
+    MonacoEditor,
+    ResizeHandle
   },
 })
 

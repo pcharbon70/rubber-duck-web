@@ -31,6 +31,7 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
           |> assign(:page_title, "Collaborative Coding - RubberDuck")
           |> assign(:layout_config, default_layout_config())
           |> assign(:duck_agent, create_duck_representation())
+          |> maybe_restore_layout_preferences()
           |> assign(:active_users, %{})
 
         # Create or join collaborative session
@@ -80,7 +81,9 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
 
   @impl Phoenix.LiveView
   def handle_event("update_layout", %{"config" => config}, socket) do
-    layout_config = merge_layout_config(socket.assigns.layout_config, config)
+    # Validate and constrain the layout configuration
+    validated_config = validate_layout_config(config)
+    layout_config = merge_layout_config(socket.assigns.layout_config, validated_config)
     
     socket =
       socket
@@ -95,6 +98,22 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
     layout_config = toggle_panel_visibility(socket.assigns.layout_config, panel)
     
     socket = assign(socket, :layout_config, layout_config)
+    {:noreply, socket}
+  end
+  
+  @impl Phoenix.LiveView
+  def handle_event("layout_restored", %{"layout" => layout_data}, socket) when is_map(layout_data) do
+    # Apply restored layout from localStorage
+    validated_config = validate_layout_config(layout_data)
+    layout_config = merge_layout_config(socket.assigns.layout_config, validated_config)
+    
+    socket = assign(socket, :layout_config, layout_config)
+    {:noreply, socket}
+  end
+  
+  @impl Phoenix.LiveView
+  def handle_event("layout_restored", _params, socket) do
+    # No saved layout found, keep defaults
     {:noreply, socket}
   end
 
@@ -238,8 +257,47 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
         presence: %{visible: true, collapsed: false}
       },
       mobile_layout: :stacked,
-      theme: :dark
+      theme: :dark,
+      # Minimum widths in percentages (based on 1200px viewport)
+      min_editor_percent: 33,  # ~400px
+      min_chat_percent: 23,    # ~280px
+      max_editor_percent: 85,
+      max_chat_percent: 67
     }
+  end
+  
+  defp validate_layout_config(config) do
+    # Get the widths, using current defaults if not provided
+    editor_percent = Map.get(config, "editor_width_percent", 70)
+    chat_percent = Map.get(config, "chat_width_percent", 30)
+    
+    # Ensure they're integers
+    editor_percent = if is_binary(editor_percent), do: String.to_integer(editor_percent), else: editor_percent
+    chat_percent = if is_binary(chat_percent), do: String.to_integer(chat_percent), else: chat_percent
+    
+    # Apply constraints
+    editor_percent = max(33, min(85, editor_percent))  # Between 33% and 85%
+    chat_percent = max(23, min(67, chat_percent))      # Between 23% and 67%
+    
+    # Ensure they add up to 100%
+    total = editor_percent + chat_percent
+    if total != 100 do
+      # Adjust chat percentage to make total 100%
+      chat_percent = 100 - editor_percent
+      # Re-validate chat percentage
+      chat_percent = max(23, min(67, chat_percent))
+      # If chat is still invalid, adjust editor too
+      {editor_percent, chat_percent} = if chat_percent < 23 or chat_percent > 67 do
+        {70, 30}  # Default to 70/30
+      else
+        {editor_percent, chat_percent}
+      end
+    end
+    
+    Map.merge(config, %{
+      "editor_width_percent" => editor_percent,
+      "chat_width_percent" => chat_percent
+    })
   end
 
   defp apply_params(socket, _params) do
@@ -272,10 +330,19 @@ defmodule RubberduckWebWeb.CollaborativeCodingLive do
     )
   end
 
-  defp persist_layout_preferences(socket, _layout_config) do
-    # TODO: Persist user layout preferences
-    # Could use browser localStorage via push_event or user preferences in DB
+  defp persist_layout_preferences(socket, layout_config) do
+    # Send layout config to browser for localStorage persistence
     socket
+    |> push_event("persist_layout", %{
+      editor_width_percent: layout_config.editor_width_percent,
+      chat_width_percent: layout_config.chat_width_percent
+    })
+  end
+  
+  defp maybe_restore_layout_preferences(socket) do
+    # Send a request to restore layout from localStorage
+    # The browser will respond with the saved layout or null
+    push_event(socket, "restore_layout", %{})
   end
 
   # Template helper functions

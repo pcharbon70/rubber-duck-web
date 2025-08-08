@@ -111,14 +111,13 @@
       
     </div>
 
-    <!-- Desktop: Side-by-side layout -->
-    <div class="hidden md:flex w-full"
-         style={"grid-template-columns: #{@layout_config.editor_width_percent}% #{@layout_config.chat_width_percent}%"}>
+    <!-- Desktop: Side-by-side layout with resize handle -->
+    <div class="hidden md:flex w-full collaborative-panels">
       
       <!-- Editor panel (desktop) -->
       <%= if @layout_config.panels.editor.visible do %>
         <section id="code-editor" 
-                 class="flex-1 min-w-0 border-r border-base-300"
+                 class="flex-none min-w-0"
                  role="region" 
                  aria-label="Code Editor"
                  style={"width: #{@layout_config.editor_width_percent}%"}>
@@ -132,8 +131,18 @@
         </section>
       <% end %>
 
+      <!-- Resize Handle -->
+      <div class="resize-handle flex-none w-1 bg-base-300 hover:bg-primary/20 hover:w-2 transition-all duration-200 cursor-col-resize"
+           phx-hook="ResizeHandle"
+           id="resize-handle"
+           title="Drag to resize panels (Double-click to reset to 70/30)">
+        <div class="w-full h-full flex items-center justify-center">
+          <div class="w-0.5 h-8 bg-base-content/20 rounded-full"></div>
+        </div>
+      </div>
+
       <!-- Chat and Presence sidebar -->
-      <aside class="flex flex-col min-w-0 bg-base-100"
+      <aside class="chat-sidebar flex flex-col flex-1 min-w-0 bg-base-100"
              style={"width: #{@layout_config.chat_width_percent}%"}>
         
         <!-- Chat panel (desktop) -->
@@ -181,13 +190,71 @@
 </div>
 
 <script>
-  // Handle layout persistence in localStorage
-  window.addEventListener('phx:page-loading-stop', () => {
-    const layoutConfig = '<%= Jason.encode!(@layout_config) %>';
-    localStorage.setItem('collaborative_layout_config', layoutConfig);
+  // Handle layout persistence and restoration
+  window.addEventListener('phx:persist_layout', (event) => {
+    try {
+      const layoutData = {
+        editor_width_percent: event.detail.editor_width_percent,
+        chat_width_percent: event.detail.chat_width_percent,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('rubberduck_layout_config', JSON.stringify(layoutData));
+    } catch (error) {
+      console.warn('Could not persist layout to localStorage:', error);
+    }
   });
   
-  // TODO: Implement panel resizing functionality
-  // TODO: Add keyboard shortcuts for common actions
-  // TODO: Add gesture support for mobile panel switching
+  window.addEventListener('phx:restore_layout', () => {
+    try {
+      const savedLayout = localStorage.getItem('rubberduck_layout_config');
+      if (savedLayout) {
+        const layoutData = JSON.parse(savedLayout);
+        // Send the restored layout back to LiveView
+        window.liveSocket.pushEvent('layout_restored', { layout: layoutData });
+      } else {
+        // No saved layout, use defaults
+        window.liveSocket.pushEvent('layout_restored', {});
+      }
+    } catch (error) {
+      console.warn('Could not restore layout from localStorage:', error);
+      // Fallback to defaults
+      window.liveSocket.pushEvent('layout_restored', {});
+    }
+  });
+  
+  // Keyboard shortcuts for quick resizing
+  document.addEventListener('keydown', (event) => {
+    // Ctrl/Cmd + 1-4 for preset layouts
+    if ((event.ctrlKey || event.metaKey) && event.key >= '1' && event.key <= '4') {
+      event.preventDefault();
+      
+      let editorPercent, chatPercent;
+      switch (event.key) {
+        case '1': // 50/50
+          editorPercent = 50;
+          chatPercent = 50;
+          break;
+        case '2': // 60/40
+          editorPercent = 60;
+          chatPercent = 40;
+          break;
+        case '3': // 70/30 (default)
+          editorPercent = 70;
+          chatPercent = 30;
+          break;
+        case '4': // 80/20
+          editorPercent = 80;
+          chatPercent = 20;
+          break;
+      }
+      
+      // Send update to LiveView
+      window.liveSocket.pushEvent('update_layout', {
+        config: {
+          editor_width_percent: editorPercent,
+          chat_width_percent: chatPercent
+        }
+      });
+    }
+  });
 </script>

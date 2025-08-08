@@ -207,3 +207,41 @@
 .conversation-messages::-webkit-scrollbar-thumb:hover {
   background: rgba(var(--base-content) / 0.3);
 }
+
+/* Resize handle styles */
+.resize-handle {
+  position: relative;
+  z-index: 10;
+}
+
+.resize-handle:hover {
+  background: linear-gradient(90deg, transparent 20%, rgba(59, 130, 246, 0.1) 50%, transparent 80%);
+}
+
+.resize-handle:active,
+.resize-handle.dragging {
+  background: linear-gradient(90deg, transparent 20%, rgba(59, 130, 246, 0.2) 50%, transparent 80%);
+}
+
+/* Collaborative panels container */
+.collaborative-panels {
+  min-height: 0;
+  flex: 1;
+}
+
+/* Ensure panels don't shrink below minimum sizes */
+#code-editor {
+  min-width: 400px;
+}
+
+.chat-sidebar {
+  min-width: 280px;
+}
+
+@media (max-width: 768px) {
+  /* On mobile, disable minimum widths as panels stack vertically */
+  #code-editor,
+  .chat-sidebar {
+    min-width: 0;
+  }
+}
