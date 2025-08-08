@@ -1,11 +1,22 @@
 # Phase 2: LLM Chat System & Duck Integration
 
+**STATUS: ~15% STARTED** 🚧
+
+## Important Architecture Note
+**The Duck LLM backend server is an external service that already exists.** This project implements the web client that connects to it via WebSockets. All references to "server" in this document refer to client-side handling unless explicitly noted as the external Duck server.
+
+## Completion Summary
+- ✅ **Duck Client Representation**: Duck visual identity created (SVG component)
+- ✅ **Basic Chat UI**: Chat component with message display implemented
+- ✅ **Channel Structure**: Basic channel topics for browser-to-Phoenix communication
+- ⚠️ **Pending**: WebSocket client to LLM server, conversation state, streaming responses
+
 ## Overview
-Implement the core LLM chat system enabling users to communicate with "Duck" (the coding assistant) via Phoenix channels. This phase establishes the conversation management, streaming responses, and chat UI optimized for LLM interactions, similar to claude.ai but integrated with the collaborative coding environment.
+Implement the web client for the LLM chat system, enabling users to communicate with the external "Duck" server (the coding assistant backend) via Phoenix Channels as a WebSocket client. This phase establishes client-side conversation management, streaming response handling, and chat UI optimized for LLM interactions, similar to claude.ai but integrated with the collaborative coding environment.
 
-## 2.1 Duck LLM Agent System
+## 2.1 Duck LLM Client Integration
 
-### 2.1.1 Duck Agent Representation
+### 2.1.1 Duck Client Representation
 - [ ] Create `Duck` module as LLM agent representation
 - [ ] Implement Duck user session with special agent privileges
 - [ ] Create Duck avatar, branding, and visual identity
@@ -13,21 +24,21 @@ Implement the core LLM chat system enabling users to communicate with "Duck" (th
 - [ ] Add Duck session persistence across server restarts
 - [ ] Implement Duck agent health monitoring and fallback
 
-### 2.1.2 LLM Server Communication
-- [ ] Create `LLMChannelClient` for external coding assistant server
-- [ ] Implement websocket connection to LLM server
-- [ ] Set up authentication and API key management for LLM server
-- [ ] Create message serialization/deserialization for LLM protocol
-- [ ] Add LLM server connection monitoring and reconnection logic
-- [ ] Implement rate limiting and request queuing for LLM calls
+### 2.1.2 LLM Server WebSocket Client
+- [ ] Create `LLMChannelClient` as WebSocket client to connect to external Duck server
+- [ ] Implement WebSocket client connection to existing LLM server endpoint
+- [ ] Set up client authentication and API key management for server access
+- [ ] Create client-side message serialization/deserialization for server protocol
+- [ ] Add client connection monitoring and automatic reconnection logic
+- [ ] Implement client-side rate limiting and request queuing
 
-### 2.1.3 Duck Response Processing
-- [ ] Create streaming response handler for Duck messages
-- [ ] Implement message chunking and progressive rendering
-- [ ] Add response validation and error handling
-- [ ] Create response formatting for different content types
-- [ ] Set up response caching for repeated queries
-- [ ] Add response timeout and fallback handling
+### 2.1.3 Server Response Processing (Client-side)
+- [ ] Create client-side streaming response handler for server messages
+- [ ] Implement client-side message chunking and progressive rendering
+- [ ] Add client validation and error handling for server responses
+- [ ] Create client formatting for different server response types
+- [ ] Set up client-side response caching for repeated queries
+- [ ] Add client timeout and fallback handling for server unavailability
 
 ## 2.2 Conversation Management System
 
@@ -92,38 +103,41 @@ end
 
 ## 2.3 Phoenix Channel LLM Integration
 
-### 2.3.1 LLM Chat Channel
+### 2.3.1 LLM Chat Channel (Client-side)
 ```elixir
 defmodule RubberduckWebWeb.LLMChatChannel do
   use Phoenix.Channel
   
   def join("session:" <> session_id <> ":llm_chat", _payload, socket) do
     # Channel join logic with conversation setup
+    # Connect to external Duck LLM server via WebSocket client
   end
   
   def handle_in("new_message", %{"content" => content}, socket) do
-    # Process user message and send to Duck
+    # Forward user message to external Duck server
   end
   
-  def handle_info({:duck_response_chunk, chunk}, socket) do
-    # Stream Duck response chunks to client
+  def handle_info({:server_response_chunk, chunk}, socket) do
+    # Stream Duck server response chunks to browser client
   end
 end
 ```
-- [ ] Create dedicated LLM chat channel for user ↔ Duck communication
-- [ ] Implement channel join with conversation initialization
-- [ ] Add message broadcasting with proper user targeting
-- [ ] Create streaming response handling for Duck messages
-- [ ] Set up channel authentication and conversation access control
-- [ ] Add channel error handling and recovery
+- [x] Create dedicated LLM chat channel for browser ↔ Phoenix server communication
+- [x] Implement channel join with conversation initialization
+- [ ] Add WebSocket client connection to external Duck LLM server
+- [ ] Forward messages between browser and LLM server
+- [ ] Handle streaming responses from LLM server to browser
+- [ ] Set up authentication pass-through to LLM server
+- [ ] Add connection error handling and recovery for both connections
 
-### 2.3.2 Streaming Response System
-- [ ] Implement server-sent events pattern for streaming responses
+### 2.3.2 Streaming Response System (Client Implementation)
+- [ ] Handle streaming responses from external LLM server
+- [ ] Forward streaming chunks to browser via Phoenix Channels
 - [ ] Create progressive message rendering in chat UI
-- [ ] Add typing indicators for Duck while processing
-- [ ] Implement response cancellation and interruption
-- [ ] Create response buffering for optimal UI updates
-- [ ] Add response completion acknowledgment
+- [ ] Display typing indicators while LLM server is processing
+- [ ] Implement request cancellation to LLM server
+- [ ] Create client-side buffering for optimal UI updates
+- [ ] Handle response completion signals from LLM server
 
 ### 2.3.3 Channel Message Patterns
 ```elixir

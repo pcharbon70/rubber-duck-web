@@ -20,6 +20,13 @@ if System.get_env("PHX_SERVER") do
   config :rubberduck_web, RubberduckWebWeb.Endpoint, server: true
 end
 
+# LLM Server Configuration
+# Configure the connection to the external Duck LLM server
+config :rubberduck_web, :llm_server,
+  url: System.get_env("DUCK_LLM_SERVER_URL") || "ws://localhost:4000/socket/websocket",
+  api_key: System.get_env("DUCK_LLM_API_KEY"),
+  channel_topic: System.get_env("DUCK_LLM_CHANNEL") || "llm:chat"
+
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you

@@ -15,6 +15,8 @@ defmodule RubberduckWeb.Application do
       RubberduckWebWeb.Presence,
       # Start a worker by calling: RubberduckWeb.Worker.start_link(arg)
       # {RubberduckWeb.Worker, arg},
+      # Start LLM client supervisor (connects to external Duck server)
+      RubberduckWeb.LLMClient.Supervisor,
       # Start to serve requests, typically the last entry
       RubberduckWebWeb.Endpoint,
       {AshAuthentication.Supervisor, [otp_app: :rubberduck_web]}
